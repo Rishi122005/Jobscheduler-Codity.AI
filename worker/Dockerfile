@@ -1,4 +1,5 @@
 FROM node:18-alpine AS builder
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
@@ -10,6 +11,7 @@ COPY worker/src ./worker/src/
 RUN npm run build --workspace=worker
 
 FROM node:18-alpine
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package*.json ./
 COPY worker/package*.json ./worker/

@@ -1,4 +1,5 @@
 FROM node:18-alpine AS builder
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
@@ -11,6 +12,7 @@ COPY backend/src ./backend/src/
 RUN npm run build --workspace=backend
 
 FROM node:18-alpine
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package*.json ./
 COPY backend/package*.json ./backend/
