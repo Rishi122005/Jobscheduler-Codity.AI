@@ -18,4 +18,4 @@ RUN npm ci --omit=dev --workspace=backend
 COPY --from=builder /app/backend/dist ./backend/dist
 EXPOSE 3001
 ENV NODE_ENV=production
-CMD ["node", "backend/dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push --schema=backend/prisma/schema.prisma && node backend/dist/index.js"]

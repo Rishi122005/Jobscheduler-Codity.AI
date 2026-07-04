@@ -45,9 +45,11 @@ let MOCK_DLQ = [
 // Determine if we should use Mock Mode (default true if API server is offline)
 let mockMode = true;
 
+const apiBaseURL = import.meta.env.VITE_API_URL || '/api';
+
 const checkBackend = async () => {
   try {
-    const res = await axios.get('/api/health');
+    const res = await axios.get(`${apiBaseURL}/health`);
     if (res.status === 200) {
       mockMode = false;
       console.log('API Server online. Mock mode disabled.');
@@ -61,7 +63,7 @@ checkBackend();
 
 // Setup API Instance
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: apiBaseURL,
   headers: {
     'Content-Type': 'application/json',
   },
