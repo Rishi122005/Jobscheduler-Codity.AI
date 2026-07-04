@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { JobStatus } from '@prisma/client';
+import cronParser from 'cron-parser';
 import prisma from '../utils/db';
 import { AuthenticatedRequest } from '../middleware/auth';
 
@@ -72,6 +73,17 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
       targetRunAt = new Date(Date.now() + delaySeconds * 1000);
     }
 
+    let nextRunAt: Date | undefined = undefined;
+    if (cronExpression) {
+      try {
+        const interval = cronParser.parse(cronExpression);
+        nextRunAt = interval.next().toDate();
+      } catch (err) {
+        res.status(400).json({ status: 'error', message: `Invalid cron expression: ${(err as Error).message}` });
+        return;
+      }
+    }
+
     const job = await prisma.job.create({
       data: {
         queueId,
@@ -80,6 +92,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         priority: priority ?? 0,
         runAt: targetRunAt,
         cronExpression,
+        nextRunAt,
         retryPolicyId,
         maxRetries: maxRetries ?? 3,
         createdById: userId,
@@ -111,6 +124,16 @@ export const createBatchJobs = async (req: Request, res: Response, next: NextFun
           targetRunAt = new Date(Date.now() + jobData.delaySeconds * 1000);
         }
 
+        let nextRunAt: Date | undefined = undefined;
+        if (jobData.cronExpression) {
+          try {
+            const interval = cronParser.parse(jobData.cronExpression);
+            nextRunAt = interval.next().toDate();
+          } catch (err) {
+            throw new Error(`Invalid cron expression in batch job: ${(err as Error).message}`);
+          }
+        }
+
         return prisma.job.create({
           data: {
             queueId,
@@ -119,6 +142,7 @@ export const createBatchJobs = async (req: Request, res: Response, next: NextFun
             priority: jobData.priority ?? 0,
             runAt: targetRunAt,
             cronExpression: jobData.cronExpression,
+            nextRunAt,
             retryPolicyId: jobData.retryPolicyId,
             maxRetries: jobData.maxRetries ?? 3,
             createdById: userId,
@@ -135,6 +159,10 @@ export const createBatchJobs = async (req: Request, res: Response, next: NextFun
       },
     });
   } catch (error) {
+    if ((error as Error).message.startsWith('Invalid cron expression')) {
+      res.status(400).json({ status: 'error', message: (error as Error).message });
+      return;
+    }
     next(error);
   }
 };
