@@ -1,0 +1,191 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>Codity - Distributed Job Scheduler Report</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    line-height: 1.6;
+    color: #1F2937;
+    margin: 40px;
+  }
+  h1 {
+    font-family: 'Segoe UI Semibold', Arial, sans-serif;
+    color: #111827;
+    font-size: 24pt;
+    border-bottom: 2px solid #8B5CF6;
+    padding-bottom: 8px;
+    margin-top: 24pt;
+  }
+  h2 {
+    font-family: 'Segoe UI Semibold', Arial, sans-serif;
+    color: #4B5563;
+    font-size: 18pt;
+    margin-top: 18pt;
+    border-bottom: 1px solid #E5E7EB;
+    padding-bottom: 4px;
+  }
+  h3 {
+    font-family: 'Segoe UI Semibold', Arial, sans-serif;
+    color: #374151;
+    font-size: 14pt;
+    margin-top: 14pt;
+  }
+  p, li {
+    font-size: 11pt;
+    color: #374151;
+  }
+  ul {
+    margin-top: 6px;
+    margin-bottom: 12px;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+  pre {
+    background-color: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    padding: 12px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 10pt;
+    color: #1F2937;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #B91C1C;
+    background-color: #F3F4F6;
+    padding: 2px 4px;
+    font-size: 10pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+  th, td {
+    border: 1px solid #D1D5DB;
+    padding: 10px;
+    font-size: 10.5pt;
+    text-align: left;
+  }
+  th {
+    background-color: #F3F4F6;
+    color: #111827;
+    font-weight: bold;
+  }
+  .link-box {
+    background-color: #F5F3EF;
+    border-left: 4px solid #8B5CF6;
+    padding: 12px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+  .link-box p {
+    margin: 4px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Codity — Distributed Job Scheduler</h1>
+<p style="font-size: 13pt; color: #6B7280; margin-top: -10px;">Official Project Report & Implementation Plan</p>
+
+<div class="link-box">
+  <p><strong>🔗 Project Repository & Deployment Details:</strong></p>
+  <p>• <strong>GitHub Repository:</strong> <a href="https://github.com/Rishi122005/Jobscheduler-Codity.AI.git">https://github.com/Rishi122005/Jobscheduler-Codity.AI.git</a></p>
+  <p>• <strong>Frontend UI Dashboard (Local):</strong> <a href="http://localhost:3000">http://localhost:3000</a></p>
+  <p>• <strong>Backend Core API (Local):</strong> <a href="http://localhost:3001">http://localhost:3001</a></p>
+  <p>• <strong>Production Frontend UI:</strong> <a href="https://jobscheduler-codity-ui.vercel.app">https://jobscheduler-codity-ui.vercel.app</a></p>
+  <p>• <strong>Production Backend API:</strong> <a href="https://jobscheduler-codity-api.herokuapp.com">https://jobscheduler-codity-api.herokuapp.com</a></p>
+</div>
+
+<h2>Section 1: Executive Summary & Abstract</h2>
+<h3>1.1 Project Introduction</h3>
+<p>In modern cloud engineering, managing resource-heavy background processes (such as email processing, transaction verification, or content transcoding) requires an architecture that prevents duplicate work, tolerates node crashes, and schedules items dynamically. Codity is a containerized, multi-tenant distributed job scheduler designed to satisfy these conditions safely and concurrently.</p>
+
+<h3>1.2 Core Problem Statement</h3>
+<p>Traditional scheduling workflows suffer from duplicate execution bugs when multiple servers query a database for pending tasks concurrently. Codity resolves this by implementing atomic database-level locks, coupled with telemetry tracking to handle worker drops and automatic exponential-backoff retries.</p>
+
+<h2>Section 2: System Architecture Design</h2>
+<p>The project is structured as a TypeScript monorepo to guarantee interface consistency across API contracts:</p>
+<ul>
+  <li><strong>React Frontend Dashboard (Vite + Tailwind CSS):</strong> Offers clear visualization of cluster CPU load, queue capacities, live logs, and active worker nodes.</li>
+  <li><strong>Express REST API Broker:</strong> Handles project management, job dispatches, and incoming worker telemetry signals.</li>
+  <li><strong>Distributed Compute Worker:</strong> Multiple parallel worker scripts that poll the queue database, execute tasks, and send periodic health status reports.</li>
+</ul>
+
+<h2>Section 3: Concurrency Control & Database Locking</h2>
+<h3>3.1 Preventing Race Conditions via SKIP LOCKED</h3>
+<p>To support multiple compute nodes polling the database without claiming the same tasks, Codity executes an atomic query containing a <code>SKIP LOCKED</code> clause:</p>
+
+<pre>
+UPDATE "jobs"
+SET "status" = 'RUNNING', "claimed_at" = NOW()
+WHERE "id" IN (
+    SELECT "id" FROM "jobs"
+    WHERE "status" = 'PENDING' AND "run_at" <= NOW()
+    ORDER BY "priority" DESC, "created_at" ASC
+    LIMIT 1
+    FOR UPDATE SKIP LOCKED
+)
+RETURNING *;
+</pre>
+
+<p>This query locks the target job row for the duration of the update transaction, instructing concurrent workers to ignore locked entries. This guarantees safe, duplicate-free execution without the overhead of external coordination clusters.</p>
+
+<h3>3.2 Database Entity Schema</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Entity Name</th>
+      <th>Key Attributes</th>
+      <th>Functional Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Users</strong></td>
+      <td>id, email, passwordHash, firstName</td>
+      <td>System operator profiles.</td>
+    </tr>
+    <tr>
+      <td><strong>Projects</strong></td>
+      <td>id, name, organizationId</td>
+      <td>Logical project segregation.</td>
+    </tr>
+    <tr>
+      <td><strong>Queues</strong></td>
+      <td>id, name, concurrencyLimit, isPaused</td>
+      <td>Task pipelines with load controllers.</td>
+    </tr>
+    <tr>
+      <td><strong>Jobs</strong></td>
+      <td>id, queueId, status, payload, runAt</td>
+      <td>Active task payloads.</td>
+    </tr>
+    <tr>
+      <td><strong>Workers</strong></td>
+      <td>id, status, lastHeartbeat, cpuUsage</td>
+      <td>Telemetry logs for cluster monitors.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Section 4: Security & Multi-Tenancy</h2>
+<ul>
+  <li><strong>Access Authorization:</strong> Protected via JSON Web Tokens (JWT) inside secure, signed HttpOnly cookies.</li>
+  <li><strong>Tenant Partitioning:</strong> Custom Express middleware validates that incoming tokens own the resource references in the current project context.</li>
+  <li><strong>Body Sanitization:</strong> Integrated Zod schema validators to intercept and reject corrupt payload requests before database queries run.</li>
+</ul>
+
+<h2>Section 5: Testing & UI Theme Customization</h2>
+<ul>
+  <li><strong>Automated Checks:</strong> Integrated Jest suites verifying routing access, tenant constraints, and user sessions.</li>
+  <li><strong>Standard White Light Mode:</strong> Zero-lag UI theme toggler mapped to CSS Custom Properties, transitioning background nodes to pure white (<code>#F9FAFB</code>) and text to high-contrast dark gray (<code>#1F2937</code>) for optimal accessibility.</li>
+</ul>
+
+</body>
+</html>
