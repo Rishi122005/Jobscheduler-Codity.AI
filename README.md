@@ -278,3 +278,5 @@ npm run frontend:dev
 1. **Database-Backed Queue (SKIP LOCKED)**: Using Postgres as a message broker avoids the complexity of running Redis (BullMQ) or RabbitMQ. Using `FOR UPDATE SKIP LOCKED` prevents race conditions where multiple workers try to claim the same task. However, this is bounded by Postgres CPU/disk write throughput. For scale beyond 10,000 jobs/sec, a dedicated broker (Kafka/RabbitMQ) should be adopted.
 2. **Stateless JWTs vs Session Stores**: Using stateless JWTs speeds up auth validation without querying the DB on every HTTP call. Token revocation is handled by client-side purge. For strict immediate logout, a Redis blacklist cache would represent a future enhancement.
 3. **Local Concurrency Promise Pool**: Workers limit local concurrency using a Promise Pool to prevent host CPU exhaustion, while queue concurrency is managed globally in Postgres queries. This guarantees distributed rate limits are respected even with many active workers.
+
+<!-- repository indexed -->
