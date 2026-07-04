@@ -6,6 +6,7 @@ COPY backend/package*.json ./backend/
 COPY backend/tsconfig.json ./backend/
 COPY backend/prisma ./backend/prisma/
 RUN npm ci --workspace=backend
+RUN npx prisma generate --schema=backend/prisma/schema.prisma
 COPY backend/src ./backend/src/
 RUN npm run build --workspace=backend
 
