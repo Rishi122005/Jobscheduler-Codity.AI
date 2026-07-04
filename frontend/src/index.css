@@ -1,0 +1,314 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════
+   CODITY DESIGN SYSTEM — CSS Custom Property Theme Engine
+   Two distinct palettes: "Obsidian" (dark) and "Slate" (light)
+   No !important hacks. Instant switch via CSS vars.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Dark Theme (default) — Obsidian Void */
+  --c-bg-base: #07070C;
+  --c-bg-surface: #0E0E17;
+  --c-bg-elevated: #14141F;
+  --c-bg-input: rgba(10, 15, 29, 0.8);
+  --c-border: #1A1A26;
+  --c-border-subtle: rgba(255, 255, 255, 0.04);
+  --c-text-primary: #F3F4F6;
+  --c-text-secondary: #9CA3AF;
+  --c-text-muted: #6B7280;
+  --c-text-heading: #FFFFFF;
+  --c-sidebar-bg: #0E0E17;
+  --c-sidebar-border: #1A1A26;
+  --c-header-bg: rgba(14, 14, 23, 0.5);
+  --c-tooltip-bg: #0b0f19;
+  --c-tooltip-border: rgba(255, 255, 255, 0.06);
+  --c-progress-track: #07070C;
+  --c-select-bg: transparent;
+  --c-select-option-bg: #0E0E17;
+  --c-table-head-bg: rgba(12, 15, 24, 0.6);
+  --c-table-row-border: rgba(255, 255, 255, 0.03);
+  --c-table-hover: rgba(255, 255, 255, 0.02);
+  --c-code-bg: rgba(10, 15, 29, 0.8);
+  --c-code-text: #E5E7EB;
+  --c-glass-bg: rgba(14, 14, 23, 0.45);
+  --c-glass-border: rgba(255, 255, 255, 0.04);
+  --c-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  --c-glass-hover-border: rgba(168, 85, 247, 0.15);
+  --c-glow-purple: rgba(139, 92, 246, 0.05);
+  --c-glow-cyan: rgba(6, 182, 212, 0.03);
+  --c-scrollbar-track: #07070C;
+  --c-scrollbar-thumb: #111827;
+  --c-scrollbar-border: #1F2937;
+  --c-accent: #A855F7;
+  --c-accent-subtle: rgba(168, 85, 247, 0.1);
+  --c-modal-overlay: rgba(0, 0, 0, 0.7);
+}
+
+html.light {
+  /* Light Theme — Clean standard white layout */
+  --c-bg-base: #F9FAFB;
+  --c-bg-surface: #FFFFFF;
+  --c-bg-elevated: #F3F4F6;
+  --c-bg-input: #FFFFFF;
+  --c-border: #E5E7EB;
+  --c-border-subtle: #F3F4F6;
+  --c-text-primary: #1F2937;
+  --c-text-secondary: #4B5563;
+  --c-text-muted: #9CA3AF;
+  --c-text-heading: #111827;
+  --c-sidebar-bg: #FFFFFF;
+  --c-sidebar-border: #E5E7EB;
+  --c-header-bg: rgba(255, 255, 255, 0.85);
+  --c-tooltip-bg: #FFFFFF;
+  --c-tooltip-border: #E5E7EB;
+  --c-progress-track: #E5E7EB;
+  --c-select-bg: #FFFFFF;
+  --c-select-option-bg: #FFFFFF;
+  --c-table-head-bg: #F3F4F6;
+  --c-table-row-border: #E5E7EB;
+  --c-table-hover: #F9FAFB;
+  --c-code-bg: #F3F4F6;
+  --c-code-text: #B91C1C;
+  --c-glass-bg: #FFFFFF;
+  --c-glass-border: #E5E7EB;
+  --c-glass-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --c-glass-hover-border: #8B5CF6;
+  --c-glow-purple: rgba(139, 92, 246, 0.01);
+  --c-glow-cyan: rgba(6, 182, 212, 0.01);
+  --c-scrollbar-track: #F9FAFB;
+  --c-scrollbar-thumb: #D1D5DB;
+  --c-scrollbar-border: #E5E7EB;
+  --c-accent: #8B5CF6;
+  --c-accent-subtle: rgba(139, 92, 246, 0.05);
+  --c-modal-overlay: rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+@layer base {
+  body {
+    background-color: var(--c-bg-base);
+    color: var(--c-text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBARS
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--c-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--c-scrollbar-thumb);
+  border-radius: 9999px;
+  border: 1px solid var(--c-scrollbar-border);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLASS CONTAINERS — theme-aware via custom properties
+   ═══════════════════════════════════════════════════════════════ */
+.glass {
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--c-glass-border);
+  box-shadow: var(--c-glass-shadow);
+}
+
+.glass:hover {
+  border-color: var(--c-glass-hover-border);
+}
+
+.glass-accent {
+  background: var(--c-accent-subtle);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MESH BACKGROUND — ambient glow overlay
+   ═══════════════════════════════════════════════════════════════ */
+.bg-mesh {
+  background-color: var(--c-bg-base);
+  background-image:
+    radial-gradient(at 50% 0%, var(--c-glow-purple) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, var(--c-glow-cyan) 0px, transparent 40%);
+  background-attachment: fixed;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOW BUTTON — sweep animation
+   ═══════════════════════════════════════════════════════════════ */
+.glow-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transition: left 0.5s ease;
+}
+
+.glow-btn:hover::after {
+  left: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PULSE INDICATOR
+   ═══════════════════════════════════════════════════════════════ */
+.pulse-green {
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: pulse-green-anim 2s infinite;
+}
+
+@keyframes pulse-green-anim {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME-AWARE OVERRIDES — Using CSS vars so toggle is instant
+   These map Tailwind's utility classes to our theme tokens.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- Light mode: clean white page bg and white cards --- */
+html.light .bg-mesh {
+  background-color: var(--c-bg-base) !important;
+  background-image: none !important;
+}
+
+/* Sidebar in light mode becomes white */
+html.light aside {
+  background-color: var(--c-sidebar-bg) !important;
+  border-right-color: var(--c-sidebar-border) !important;
+}
+
+html.light aside h1 {
+  background: none !important;
+  -webkit-text-fill-color: var(--c-text-heading) !important;
+  color: var(--c-text-heading) !important;
+}
+
+/* Header bar */
+html.light header {
+  background-color: var(--c-header-bg) !important;
+  border-bottom-color: var(--c-border) !important;
+}
+
+/* Cards and elevated surfaces stay dark in light mode */
+html.light .bg-darkCard,
+html.light .bg-darkCard\/50,
+html.light .bg-darkCard\/20 {
+  background-color: var(--c-bg-surface) !important;
+}
+
+/* Inner elevated surfaces stay dark — but NOT the page container (bg-mesh handles that) */
+html.light .bg-darkBg:not(.bg-mesh) {
+  background-color: var(--c-bg-elevated) !important;
+}
+
+html.light .bg-darkBg\/60 {
+  background-color: var(--c-bg-elevated) !important;
+}
+
+/* Borders */
+html.light .border-darkBorder,
+html.light .border-darkBorder\/40,
+html.light .border-white\/5,
+html.light .border-white\/10 {
+  border-color: var(--c-border) !important;
+}
+
+/* Inputs */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: var(--c-bg-input) !important;
+  color: var(--c-text-primary) !important;
+  border-color: var(--c-border) !important;
+}
+
+html.light option {
+  background-color: var(--c-select-option-bg) !important;
+  color: var(--c-text-primary) !important;
+}
+
+/* Table overrides */
+html.light thead {
+  background-color: var(--c-table-head-bg) !important;
+}
+
+html.light tbody tr {
+  border-bottom-color: var(--c-table-row-border) !important;
+}
+
+html.light tbody tr:hover {
+  background-color: var(--c-table-hover) !important;
+}
+
+/* Code blocks */
+html.light pre,
+html.light code {
+  background-color: var(--c-code-bg) !important;
+  color: var(--c-code-text) !important;
+}
+
+/* Progress bar tracks */
+html.light .bg-darkBg {
+  background-color: var(--c-progress-track) !important;
+}
+
+/* Text color mapping for light mode — keep light on dark cards */
+html.light .text-white {
+  color: var(--c-text-heading) !important;
+}
+
+html.light .text-gray-100,
+html.light .text-gray-200 {
+  color: var(--c-text-primary) !important;
+}
+
+html.light .text-gray-300 {
+  color: var(--c-text-secondary) !important;
+}
+
+html.light .text-gray-400 {
+  color: var(--c-text-secondary) !important;
+}
+
+html.light .text-gray-500 {
+  color: var(--c-text-muted) !important;
+}
+
+html.light .text-gray-600 {
+  color: var(--c-text-muted) !important;
+}
+
+/* Modal overlays */
+html.light .bg-black\/60 {
+  background-color: var(--c-modal-overlay) !important;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "distributed-job-scheduler-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Distributed Job Scheduler monorepo containing backend, worker, and frontend.",
+  "workspaces": [
+    "backend",
+    "worker",
+    "frontend"
+  ],
+  "scripts": {
+    "backend:dev": "npm run dev --workspace=backend",
+    "worker:dev": "npm run dev --workspace=worker",
+    "frontend:dev": "npm run dev --workspace=frontend",
+    "db:up": "docker compose -f docker/docker-compose.yml up -d",
+    "db:down": "docker compose -f docker/docker-compose.yml down",
+    "db:migrate": "npm run db:migrate --workspace=backend",
+    "db:studio": "npm run db:studio --workspace=backend"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  }
+}
